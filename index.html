@@ -84,7 +84,7 @@ const csel=id=>`<select id="${id}">${D.chars.map(c=>`<option value="${c.id}">${e
 const INTRO="국가안전관리청. 통칭 NSMA에 입청하셨습니다. 본 홈페이지는 국안관 요원들이 이용하는 사이트로 외부인의 출입 및 기록 유출을 일제히 금합니다.";
 function typeIntro(){let i=0;const t=setInterval(()=>{const e=$("ty");if(!e){clearInterval(t);return}i++;e.textContent=INTRO.slice(0,i);if(i>=INTRO.length){clearInterval(t);$("gt").style.display="block"}},45)}
 function skip(){$("ty").textContent=INTRO;$("gt").style.display="block"}
-const EM=i=>i+"@nsma-agency.com",UN=u=>u.email.split("@")[0];
+const EM=i=>i+"@gmail.com",UN=u=>u.email.split("@")[0];
 async function loadAll(i,nk){
 const w=await sb.from("world").select("data").eq("id",1).maybeSingle();
 const S0=JSON.parse(JSON.stringify(SEED));D=norm(w.data&&w.data.data?Object.assign(S0,w.data.data):S0);
