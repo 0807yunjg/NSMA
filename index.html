@@ -76,6 +76,7 @@ main{padding-left:58px}.sbar{position:fixed;left:0;top:70px;display:flex;flex-di
 .bchat{max-height:340px;overflow:auto;margin:6px 0;padding:6px;background:rgba(255,255,255,.12);border-radius:10px}.bb{max-width:86%;padding:6px 10px;border-radius:14px;margin:5px 0;font-size:14px;line-height:1.45;clear:both}.bb.me{background:#1f4e8c;color:#fff;margin-left:auto;border-bottom-right-radius:3px}.bb.them{background:#fff;color:#222;display:flex;gap:6px;align-items:flex-start;border-bottom-left-radius:3px}
 @media(max-width:560px){.intwrap{flex-direction:column}.rside{width:auto}.nbpg{grid-template-columns:1fr}}
 @media(min-width:1100px){main{max-width:1560px}.wall{grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:52px 30px;padding:40px 12px 50px}.wall .note{min-height:150px;font-size:26px;padding:30px 12px 18px}.intwrap .desk{padding:16px;min-height:68vh}.bchat{max-height:58vh;min-height:320px}.rside{width:220px;font-size:14px}.bb{font-size:17px}.pg{grid-template-columns:minmax(0,2.4fr) minmax(320px,1fr)}}@keyframes blink{50%{opacity:0}}@keyframes cifade{from{opacity:0}to{opacity:1}}@keyframes ciin{from{transform:translateY(60px) scale(.94);opacity:0}to{transform:none;opacity:1}}</style></head><body><main id="app"></main>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.58.0/dist/umd/supabase.min.js"></script>
 <script>
 if(typeof window!=="undefined"&&window.confirm)(function(){const _cf=window.confirm.bind(window),pend={};
 window.confirm=function(m){const t=Date.now();let r=null;try{r=_cf(m)}catch(e){}
@@ -8455,7 +8456,30 @@ const _Bcrew94=B.crew110;B.crew110=function(){let h=_Bcrew94.apply(this,argument
 const SB111={url:"https://hvxkwsotlusvoiegrspr.supabase.co",key:"sb_publishable_iM5uD9hH_9FkcCAHjioOIA_lL7y88aW"};
 var sb111=null,SBME=null,SBON=false,SBADM=false,SBWORLD=false,SBLOCAL=false,SBBOOT=false,SBST="",SBERR="",SBAT=0,SBLAST={w:"",p:""},SBTM=0,SBBK=0,SBPUSH=false,SBMSG="",SBBL=null,SBWT="";
 try{if(!localStorage.getItem("nsma95local")&&!localStorage.getItem("nsma95srv")&&localStorage.getItem("nsma5"))localStorage.setItem("nsma95local",localStorage.getItem("nsma5"))}catch(e){}
-function sbAvail111(){return typeof supabase!="undefined"&&supabase&&typeof supabase.createClient=="function"}
+function sbAvail111(){return true}
+function shim111(url,key){const SK="nsma111sess";let sess=null;try{sess=JSON.parse(localStorage.getItem(SK)||"null")}catch(e){}
+  const save=function(s){sess=s;try{s?localStorage.setItem(SK,JSON.stringify(s)):localStorage.removeItem(SK)}catch(e){}};
+  const J=async function(path,opt){const r=await fetch(url+path,opt);let b=null;const t=await r.text();try{b=t?JSON.parse(t):null}catch(e){b=t}return{ok:r.ok,status:r.status,body:b}};
+  const mk=function(b){return{access_token:b.access_token,refresh_token:b.refresh_token,expires_at:Math.floor(Date.now()/1000)+(+b.expires_in||3600)-30,user:b.user}};
+  const em=function(r,d){return(r.body&&(r.body.msg||r.body.error_description||r.body.message))||d};
+  const AH={apikey:key,"Content-Type":"application/json"};
+  async function tok(){if(!sess)return null;if(sess.expires_at<Math.floor(Date.now()/1000)){const r=await J("/auth/v1/token?grant_type=refresh_token",{method:"POST",headers:AH,body:JSON.stringify({refresh_token:sess.refresh_token})});if(r.ok&&r.body&&r.body.access_token)save(mk(r.body));else{save(null);return null}}return sess.access_token}
+  const auth={async signUp(o){const r=await J("/auth/v1/signup",{method:"POST",headers:AH,body:JSON.stringify({email:o.email,password:o.password})});if(!r.ok)return{data:{},error:{message:em(r,"가입 실패")}};if(r.body&&r.body.access_token){save(mk(r.body));return{data:{user:sess.user,session:sess},error:null}}return{data:{user:r.body&&r.body.user||r.body,session:null},error:null}},
+    async signInWithPassword(o){const r=await J("/auth/v1/token?grant_type=password",{method:"POST",headers:AH,body:JSON.stringify({email:o.email,password:o.password})});if(!r.ok||!r.body||!r.body.access_token)return{data:{},error:{message:em(r,"로그인 실패")}};save(mk(r.body));return{data:{user:sess.user,session:sess},error:null}},
+    async getSession(){const t=await tok();return{data:{session:t?{user:sess.user,access_token:t}:null}}},
+    async signOut(){try{if(sess)await J("/auth/v1/logout",{method:"POST",headers:{apikey:key,Authorization:"Bearer "+sess.access_token}})}catch(e){}save(null);return{error:null}}};
+  function from(t){const st={op:"select",q:[],ord:null,rng:null,lim:null,single:false,row:null,cols:"*"};const b={select:function(c){if(c)st.cols=c;return b},eq:function(c,v){st.q.push(c+"=eq."+encodeURIComponent(v));return b},in:function(c,v){st.q.push(c+"=in.("+v.map(encodeURIComponent).join(",")+")");return b},order:function(c,o){st.ord=c+"."+(o&&o.ascending===false?"desc":"asc");return b},range:function(a,z){st.rng=[a,z];return b},limit:function(n){st.lim=n;return b},insert:function(r){st.op="insert";st.row=r;return b},upsert:function(r){st.op="upsert";st.row=r;return b},delete:function(){st.op="delete";return b},maybeSingle:function(){st.single=true;return b},then:function(res,rej){return run().then(res,rej)}};
+    async function run(){const tk=await tok();if(!tk)return{data:null,error:{message:"로그인이 필요합니다"}};const h={apikey:key,Authorization:"Bearer "+tk,"Content-Type":"application/json"};let path="/rest/v1/"+t;const opt={headers:h};
+      if(st.op=="select"){const q=["select="+encodeURIComponent(st.cols)].concat(st.q);if(st.ord)q.push("order="+st.ord);if(st.rng){q.push("offset="+st.rng[0]);q.push("limit="+(st.rng[1]-st.rng[0]+1))}else if(st.single)q.push("limit=1");else if(st.lim)q.push("limit="+st.lim);path+="?"+q.join("&");opt.method="GET"}
+      else if(st.op=="insert"){opt.method="POST";h.Prefer="return=minimal";opt.body=JSON.stringify(st.row)}
+      else if(st.op=="upsert"){opt.method="POST";h.Prefer="resolution=merge-duplicates,return=minimal";opt.body=JSON.stringify(st.row)}
+      else{opt.method="DELETE";h.Prefer="return=minimal";path+="?"+st.q.join("&")}
+      const r=await J(path,opt);if(!r.ok)return{data:null,error:{message:em(r,"HTTP "+r.status)}};
+      if(st.op=="select"){const L=Array.isArray(r.body)?r.body:[];return{data:st.single?(L[0]||null):L,error:null}}return{data:null,error:null}}
+    return b}
+  async function rpc(n,a){const tk=await tok();if(!tk)return{data:null,error:{message:"auth"}};const r=await J("/rest/v1/rpc/"+n,{method:"POST",headers:{apikey:key,Authorization:"Bearer "+tk,"Content-Type":"application/json"},body:JSON.stringify(a||{})});return r.ok?{data:r.body,error:null}:{data:null,error:{message:em(r,"HTTP "+r.status)}}}
+  return{auth:auth,from:from,rpc:rpc}}
+function sbMk111(){if(typeof supabase!="undefined"&&supabase&&typeof supabase.createClient=="function"){try{return supabase.createClient(SB111.url,SB111.key)}catch(e){}}return shim111(SB111.url,SB111.key)}
 /* ----- 월드(관리자 작성) / 진행(유저별) 나누기 ----- */
 const UK111=["chat","lg","lt"];
 function split111(){const w=Object.assign({},D);UK111.forEach(function(k){delete w[k]});const sid={};(SEED.posts||[]).forEach(function(p){sid[p.id]=1});
@@ -8472,7 +8496,7 @@ function merge111(w,u){const d=norm(Object.assign(JSON.parse(JSON.stringify(SEED
 const _render111=render;
 render=function(){if(!mode&&!SBLOCAL&&SBLIBWAIT&&!sbAvail111()){$("app").innerHTML='<div class="term"><div><span>&gt; 서버에 연결하는 중…</span><span class="cur">▍</span></div></div>';return}if(!mode&&sbAvail111()&&!SBLOCAL){drawLogin111();return}_render111();try{if(!mode&&!sbAvail111()&&$("gt")){$("gt").insertAdjacentHTML("afterbegin",'<p style="color:#fca5a5">⚠ 서버 연결 라이브러리를 불러오지 못해 <b>로컬 모드</b>입니다. (광고 차단·네트워크를 확인하고 새로고침하세요) · 111차</p>')}}catch(e){}try{badge111()}catch(e){}};
 function drawLogin111(){const m=$("app");if(SBBOOT){m.innerHTML='<div class="term"><div><span>&gt; 접속 중…</span><span class="cur">▍</span></div></div>';return}if(document.getElementById("lid111"))return;
-  m.innerHTML='<div class="term"><div onclick="skip()"><span id="ty"></span><span class="cur">▍</span></div><div id="gt" style="display:none"><p>&gt; 이메일과 코드로 입청하세요. 처음이면 회원가입.</p><input class="tin" id="lid111" placeholder="이메일"><input class="tin" id="code111" type="password" placeholder="코드 (6자 이상)" onkeydown="if(event.key==\'Enter\')sbAuth111(0)"><input class="tin" id="nk111" placeholder="닉네임 (회원가입 시)"><button class="tb" onclick="sbAuth111(0)">로그인</button> <button class="tb" onclick="sbAuth111(1)">회원가입</button><p id="err111">'+esc(SBMSG)+'</p><p><a href="#" class="mu" onclick="SBLOCAL=1;render();return false">접속 코드로 로컬 체험(서버 저장 안 함)</a></p></div></div>';typeIntro()}
+  m.innerHTML='<div class="term"><div onclick="skip()"><span id="ty"></span><span class="cur">▍</span></div><div id="gt" style="display:none"><p>&gt; 이메일과 코드로 입청하세요. 처음이면 회원가입. <span class="mu">(111차)</span></p><input class="tin" id="lid111" placeholder="이메일"><input class="tin" id="code111" type="password" placeholder="코드 (6자 이상)" onkeydown="if(event.key==\'Enter\')sbAuth111(0)"><input class="tin" id="nk111" placeholder="닉네임 (회원가입 시)"><button class="tb" onclick="sbAuth111(0)">로그인</button> <button class="tb" onclick="sbAuth111(1)">회원가입</button><p id="err111">'+esc(SBMSG)+'</p><p><a href="#" class="mu" onclick="SBLOCAL=1;render();return false">접속 코드로 로컬 체험(서버 저장 안 함)</a></p></div></div>';typeIntro()}
 async function sbAuth111(su){const i=($("lid111").value||"").trim().toLowerCase(),c=$("code111").value,e=$("err111");
   if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(i)){e.textContent="이메일 형식을 확인하세요.";return}if(c.length<6){e.textContent="코드는 6자 이상이어야 합니다.";return}e.textContent="처리 중…";
   try{const r=su?await sb111.auth.signUp({email:i,password:c}):await sb111.auth.signInWithPassword({email:i,password:c});
@@ -8530,9 +8554,8 @@ const _ab111=admBody;admBody=function(k){if(k=="sb111")return sbEd111();return _
 reg65(["sb111","☁","서버 연결·백업","Supabase 서버 저장 상태, 서버 월드 올리기, 자동 백업과 되돌리기.","서버에 월드 올리기",["서버","supabase","백업","저장","연결"],function(){return SBWORLD?1:0}]);TLL65.sb111="서버 연결·백업";
 /* ----- 시작: 저장된 로그인 복원 ----- */
 var SBLIBERR=false,SBLIBWAIT=false,SBNEW=false;
-function sbBoot111(){if(sb111)return;try{sb111=supabase.createClient(SB111.url,SB111.key)}catch(e){return}SBBOOT=true;render();(async function(){try{const g=(await sb111.auth.getSession()).data.session;if(g){SBME=g.user;await sbLoad111("");SBBOOT=false;sbEnter111();return}}catch(e){SBMSG="자동 로그인 실패: "+(e&&e.message?e.message:"")}SBBOOT=false;render()})()}
-function sbAlt111(){SBLIBWAIT=true;const sc=document.createElement("script");sc.src="https://unpkg.com/@supabase/supabase-js@2.58.0/dist/umd/supabase.min.js";sc.onload=function(){SBLIBWAIT=false;if(sbAvail111()){SBLIBERR=false;sbBoot111()}else{SBLIBERR=true;render()}};sc.onerror=function(){SBLIBWAIT=false;SBLIBERR=true;render()};document.head.appendChild(sc);render()}
-if(sbAvail111())sbBoot111();else sbAlt111();
+function sbBoot111(){if(sb111)return;try{sb111=sbMk111()}catch(e){return}SBBOOT=true;render();(async function(){try{const g=(await sb111.auth.getSession()).data.session;if(g){SBME=g.user;await sbLoad111("");SBBOOT=false;sbEnter111();return}}catch(e){SBMSG="자동 로그인 실패: "+(e&&e.message?e.message:"")}SBBOOT=false;render()})()}
+sbBoot111();
 /* ----- 관리자가 월드를 업데이트하면 유저에게 알림 (1분마다 확인) ----- */
 setInterval(async function(){try{if(!SBON||!sb111||adm()||SBPUSH)return;const r=await sb111.from("world").select("updated_at").eq("id",1).maybeSingle();if(r.data&&r.data.updated_at&&SBWT&&String(r.data.updated_at)!=String(SBWT)&&!SBNEW){SBNEW=true;badge111()}}catch(e){}},60000);
 
