@@ -76,6 +76,7 @@ main{padding-left:58px}.sbar{position:fixed;left:0;top:70px;display:flex;flex-di
 .bchat{max-height:340px;overflow:auto;margin:6px 0;padding:6px;background:rgba(255,255,255,.12);border-radius:10px}.bb{max-width:86%;padding:6px 10px;border-radius:14px;margin:5px 0;font-size:14px;line-height:1.45;clear:both}.bb.me{background:#1f4e8c;color:#fff;margin-left:auto;border-bottom-right-radius:3px}.bb.them{background:#fff;color:#222;display:flex;gap:6px;align-items:flex-start;border-bottom-left-radius:3px}
 @media(max-width:560px){.intwrap{flex-direction:column}.rside{width:auto}.nbpg{grid-template-columns:1fr}}
 @media(min-width:1100px){main{max-width:1560px}.wall{grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:52px 30px;padding:40px 12px 50px}.wall .note{min-height:150px;font-size:26px;padding:30px 12px 18px}.intwrap .desk{padding:16px;min-height:68vh}.bchat{max-height:58vh;min-height:320px}.rside{width:220px;font-size:14px}.bb{font-size:17px}.pg{grid-template-columns:minmax(0,2.4fr) minmax(320px,1fr)}}@keyframes blink{50%{opacity:0}}@keyframes cifade{from{opacity:0}to{opacity:1}}@keyframes ciin{from{transform:translateY(60px) scale(.94);opacity:0}to{transform:none;opacity:1}}</style></head><body><main id="app"></main>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.58.0/dist/umd/supabase.min.js"></script>
 <script>
 if(typeof window!=="undefined"&&window.confirm)(function(){const _cf=window.confirm.bind(window),pend={};
 window.confirm=function(m){const t=Date.now();let r=null;try{r=_cf(m)}catch(e){}
@@ -8450,6 +8451,86 @@ const _cwTog94=cwTog110;cwTog110=function(id){cwWhy110="";return _cwTog94.apply(
 const _cwClr94=cwClear110;cwClear110=function(){cwWhy110="";return _cwClr94.apply(this,arguments)};
 const _cwCan94=cwCancel110;cwCancel110=function(){cwWhy110="";return _cwCan94.apply(this,arguments)};
 const _Bcrew94=B.crew110;B.crew110=function(){let h=_Bcrew94.apply(this,arguments);h=h.replace("⚡ 추천 편성","⚡ 최적 편성 추천");if(cwWhy110){const m='<div style="margin:8px 0"><button class="pri"';const i=h.lastIndexOf(m);if(i>=0)h=h.slice(0,i)+cwWhy110+h.slice(i)}return h};
+
+/* ===== q111 (111차): Supabase 서버 연결 — 로그인 · 월드(관리자) / 진행(유저) 분리 저장 · 자동 백업 ===== */
+const SB111={url:"https://hvxkwsotlusvoiegrspr.supabase.co",key:"sb_publishable_iM5uD9hH_9FkcCAHjioOIA_lL7y88aW"};
+var sb111=null,SBME=null,SBON=false,SBADM=false,SBWORLD=false,SBLOCAL=false,SBBOOT=false,SBST="",SBERR="",SBAT=0,SBLAST={w:"",p:""},SBTM=0,SBBK=0,SBPUSH=false,SBMSG="",SBBL=null,SBWT="";
+try{if(!localStorage.getItem("nsma95local")&&!localStorage.getItem("nsma95srv")&&localStorage.getItem("nsma5"))localStorage.setItem("nsma95local",localStorage.getItem("nsma5"))}catch(e){}
+function sbAvail111(){return typeof supabase!="undefined"&&supabase&&typeof supabase.createClient=="function"}
+/* ----- 월드(관리자 작성) / 진행(유저별) 나누기 ----- */
+const UK111=["chat","lg","lt"];
+function split111(){const w=Object.assign({},D);UK111.forEach(function(k){delete w[k]});const sid={};(SEED.posts||[]).forEach(function(p){sid[p.id]=1});
+  w.bp=(D.bp||[]).filter(function(x){return !x.u}).map(function(x){return Object.assign({},x,{cm:(x.cm||[]).filter(function(c){return !c.u})})});
+  w.posts=(D.posts||[]).filter(function(p){return !(p.w=="u"&&!sid[p.id])});
+  w.notes={};const un={};Object.keys(D.notes||{}).forEach(function(k){const L=D.notes[k]||[];const a=L.filter(function(n){return n.w=="a"}),b=L.filter(function(n){return n.w!="a"});if(a.length)w.notes[k]=a;if(b.length)un[k]=b});
+  const u={};UK111.forEach(function(k){if(D[k]!==undefined)u[k]=D[k]});u.notes=un;u.bp=(D.bp||[]).filter(function(x){return x.u});u.bcm={};(D.bp||[]).forEach(function(x){if(!x.u){const c=(x.cm||[]).filter(function(c){return c.u});if(c.length)u.bcm[x.id]=c}});u.posts=(D.posts||[]).filter(function(p){return p.w=="u"&&!sid[p.id]});
+  return{world:w,user:u}}
+function merge111(w,u){const d=norm(Object.assign(JSON.parse(JSON.stringify(SEED)),w||{}));u=u||{};UK111.forEach(function(k){if(u[k]!==undefined)d[k]=u[k]});
+  d.notes=d.notes||{};Object.keys(u.notes||{}).forEach(function(k){d.notes[k]=(d.notes[k]||[]).concat(u.notes[k])});
+  const bp=(d.bp||[]).slice();(u.bp||[]).forEach(function(x){if(!bp.some(function(y){return y.id==x.id}))bp.unshift(x)});bp.forEach(function(x){const c=(u.bcm||{})[x.id];if(c){x.cm=x.cm||[];c.forEach(function(y){if(!x.cm.some(function(z){return z.id==y.id}))x.cm.push(y)})}});d.bp=bp;
+  d.posts=(d.posts||[]).concat((u.posts||[]).filter(function(p){return !(d.posts||[]).some(function(q){return q.id==p.id})}));return d}
+/* ----- 로그인 화면 ----- */
+const _render111=render;
+render=function(){if(!mode&&sbAvail111()&&!SBLOCAL){drawLogin111();return}_render111();try{badge111()}catch(e){}};
+function drawLogin111(){const m=$("app");if(SBBOOT){m.innerHTML='<div class="term"><div><span>&gt; 접속 중…</span><span class="cur">▍</span></div></div>';return}if(document.getElementById("lid111"))return;
+  m.innerHTML='<div class="term"><div onclick="skip()"><span id="ty"></span><span class="cur">▍</span></div><div id="gt" style="display:none"><p>&gt; 이메일과 코드로 입청하세요. 처음이면 회원가입.</p><input class="tin" id="lid111" placeholder="이메일"><input class="tin" id="code111" type="password" placeholder="코드 (6자 이상)" onkeydown="if(event.key==\'Enter\')sbAuth111(0)"><input class="tin" id="nk111" placeholder="닉네임 (회원가입 시)"><button class="tb" onclick="sbAuth111(0)">로그인</button> <button class="tb" onclick="sbAuth111(1)">회원가입</button><p id="err111">'+esc(SBMSG)+'</p><p><a href="#" class="mu" onclick="SBLOCAL=1;render();return false">접속 코드로 로컬 체험(서버 저장 안 함)</a></p></div></div>';typeIntro()}
+async function sbAuth111(su){const i=($("lid111").value||"").trim().toLowerCase(),c=$("code111").value,e=$("err111");
+  if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(i)){e.textContent="이메일 형식을 확인하세요.";return}if(c.length<6){e.textContent="코드는 6자 이상이어야 합니다.";return}e.textContent="처리 중…";
+  try{const r=su?await sb111.auth.signUp({email:i,password:c}):await sb111.auth.signInWithPassword({email:i,password:c});
+    if(r.error){e.textContent=su?"가입 실패: "+r.error.message:"아이디 또는 코드가 올바르지 않습니다.";return}
+    if(!r.data.session){e.textContent="이메일 확인 설정이 켜져 있습니다. Supabase의 Authentication → Providers → Email 에서 Confirm email을 꺼 주세요.";return}
+    SBME=r.data.user;await sbLoad111(($("nk111").value||"").trim());sbEnter111()}catch(x){e.textContent="오류: "+(x&&x.message?x.message:"서버에 연결할 수 없습니다.")}}
+function sbEnter111(){let m="u";try{if(SBADM&&localStorage.getItem("nsma95mode")=="a")m="a"}catch(e){}mode=m;view="home";SBMSG="";render()}
+/* ----- 서버에서 불러오기 ----- */
+async function sbLoad111(nk){const me=SBME,em=me.email||"",w=await sb111.from("world").select("data,updated_at").eq("id",1).maybeSingle();if(w.error)throw new Error("world 읽기 실패: "+w.error.message);
+  let pr=await sb111.from("profiles").select("is_admin,nick").eq("id",me.id).maybeSingle();if(pr.error)throw new Error("profiles 읽기 실패: "+pr.error.message);
+  if(!pr.data){const nn=nk||em.split("@")[0],ins=await sb111.from("profiles").insert({id:me.id,uid:em,nick:nn});if(ins.error)throw new Error("profiles 저장 실패: "+ins.error.message);pr={data:{is_admin:false,nick:nn}}}
+  SBADM=!!pr.data.is_admin;const pg=await sb111.from("progress").select("data").eq("user_id",me.id).maybeSingle();if(pg.error)throw new Error("progress 읽기 실패: "+pg.error.message);const x=(pg.data&&pg.data.data)||{};
+  SBWORLD=!!(w.data&&w.data.data&&Object.keys(w.data.data).length);SBWT=SBWORLD?(w.data.updated_at||""):"";
+  D=merge111(SBWORLD?w.data.data:null,x.u);P=Object.assign(pdef(),x.P||{});if(!P.pf)P.pf={nick:"",age:"",img:""};if(!P.pf.nick)P.pf.nick=pr.data.nick||em.split("@")[0];
+  SBON=true;try{localStorage.setItem("nsma95srv","1")}catch(e){}
+  const sp=split111();SBLAST={w:JSON.stringify(sp.world),p:JSON.stringify({P:P,u:sp.user})};SBST="ok";SBAT=Date.now();sv()}
+/* ----- 저장 (sv()가 localStorage에 쓸 때마다 서버에도 저장) ----- */
+(function(){try{const o=Storage.prototype.setItem;Storage.prototype.setItem=function(k,v){const r=o.apply(this,arguments);if(SBON&&(k=="nsma5"||k=="nsma5p"))sbSched111();return r}}catch(e){}})();
+function sbSched111(){clearTimeout(SBTM);SBST="pending";SBTM=setTimeout(function(){sbPush111()},1500);badge111()}
+async function sbBackup111(note,force){const now=Date.now();if(!force&&SBBK&&now-SBBK<30*60000)return true;const cur=await sb111.from("world").select("data").eq("id",1).maybeSingle();if(cur.error||!cur.data||!cur.data.data||!Object.keys(cur.data.data).length)return true;const r=await sb111.from("world_backup").insert({data:cur.data.data,note:note||"자동 백업 (편집 전 서버 상태)"});if(r.error){SBERR="백업 실패(SQL의 world_backup 표가 있는지 확인): "+r.error.message;return false}SBBK=now;
+  const l=await sb111.from("world_backup").select("id").order("id",{ascending:false}).range(20,400);if(l.data&&l.data.length)await sb111.from("world_backup").delete().in("id",l.data.map(function(x){return x.id}));SBBL=null;return true}
+async function sbPush111(force){if(!SBON||!SBME)return;if(SBPUSH){SBTM=setTimeout(function(){sbPush111(force)},800);return}SBPUSH=true;SBERR="";
+  try{const sp=split111();
+    if(!(typeof ADMSB!="undefined"&&ADMSB)){const ps=JSON.stringify({P:P,u:sp.user});if(force||ps!=SBLAST.p){const r=await sb111.from("progress").upsert({user_id:SBME.id,data:{P:P,u:sp.user},updated_at:new Date().toISOString()});if(r.error)throw new Error(r.error.message);SBLAST.p=ps}}
+    if(adm()&&SBADM&&(SBWORLD||force==="world")){const ws=JSON.stringify(sp.world);if(force||ws!=SBLAST.w){await sbBackup111();const r=await sb111.from("world").upsert({id:1,data:sp.world,updated_at:new Date().toISOString()});if(r.error)throw new Error("월드 저장 실패: "+r.error.message);SBLAST.w=ws;SBWORLD=true;SBWT=new Date().toISOString()}}
+    SBST=SBERR?"err":"ok";SBAT=Date.now()}catch(e){SBST="err";SBERR=e.message||String(e)}finally{SBPUSH=false}badge111()}
+try{window.addEventListener("pagehide",function(){if(SBON&&SBST!="ok")sbPush111()});document.addEventListener("visibilitychange",function(){if(document.hidden&&SBON&&SBST=="pending"){clearTimeout(SBTM);sbPush111()}})}catch(e){}
+function badge111(){let b=document.getElementById("sbbadge111");if(!SBON){if(b)b.remove();return}if(!b){b=document.createElement("div");b.id="sbbadge111";b.style.cssText="position:fixed;left:8px;bottom:6px;z-index:60;font-size:11px;padding:2px 8px;border-radius:10px;background:#000a;color:#fff;pointer-events:none;max-width:70vw;white-space:nowrap;overflow:hidden;text-overflow:ellipsis";document.body.appendChild(b)}
+  const t=new Date(SBAT||Date.now());b.textContent=SBST=="err"?"⚠ 서버 저장 실패: "+SBERR:SBST=="pending"?"☁ 저장 중…":(adm()&&SBADM&&!SBWORLD)?"⚠ 서버 월드 미설정 (관리자 도구 ‘서버 연결·백업’)":"☁ 저장됨 "+("0"+t.getHours()).slice(-2)+":"+("0"+t.getMinutes()).slice(-2);b.style.background=SBST=="err"||(adm()&&SBADM&&!SBWORLD)?"#b42318":"#000a"}
+/* ----- 로그아웃 · 모드 전환 · 관리자 ----- */
+const _logout111=logout;
+logout=function(){if(!SBON){return _logout111.apply(this,arguments)}sbLogout111()};
+async function sbLogout111(){clearTimeout(SBTM);try{await sbPush111(true)}catch(e){}try{await sb111.auth.signOut()}catch(e){}SBON=false;SBME=null;SBADM=false;SBWORLD=false;try{localStorage.removeItem("nsma5");localStorage.removeItem("nsma5p");localStorage.removeItem("nsma95srv")}catch(e){}D=norm(JSON.parse(JSON.stringify(SEED)));P=pdef();mode=null;view="home";pa=null;cs=null;ph=false;SBLAST={w:"",p:""};SBLOCAL=false;render()}
+async function sbMode111(m){if(!SBON)return;if(m=="a"&&!SBADM)return;if(adm()&&m=="u"){clearTimeout(SBTM);await sbPush111()}mode=m;try{localStorage.setItem("nsma95mode",m)}catch(e){}view="home";pa=null;ph=false;render()}
+async function sbClaim111(){const el=document.getElementById("ac111"),am=document.getElementById("am111");const r=await sb111.rpc("claim_admin",{code:el?el.value:""});if(r.data===true){SBADM=true;SBMSG="";await sbMode111("a")}else if(am)am.textContent="코드가 올바르지 않습니다."}
+async function sbRelease111(){await sbMode111("u");try{await sb111.rpc("release_admin")}catch(e){}SBADM=false;render()}
+async function sbReload111(){if(!SBON)return;clearTimeout(SBTM);try{await sbPush111(true);await sbLoad111("");SBMSG="";render()}catch(e){SBST="err";SBERR=e.message;render()}}
+/* ----- 프로필: 계정·서버 카드 ----- */
+function acct111(){if(!SBON)return"";const A=SBADM;return '<div class="card"><h3>☁ 계정·서버</h3><div class="mu">계정: '+esc((SBME&&SBME.email)||"")+" · "+(adm()?"관리자 모드":"일반 모드")+'</div><div class="mu">진행 상황은 이 계정에 자동 저장되어 다른 기기에서도 이어집니다.'+(SBST=="err"?' <b style="color:#b42318">(저장 실패: '+esc(SBERR)+")</b>":"")+'</div><button onclick="sbReload111()">🔄 최신 세계 데이터 다시 받기</button>'+(A?(adm()?' <button onclick="sbMode111(\'u\')">일반 모드로 전환</button>':' <button class="pri" onclick="sbMode111(\'a\')">관리자 모드로 전환</button>')+' <button onclick="sbRelease111()">관리자 권한 해제</button>':'<div style="margin-top:6px"><input id="ac111" type="password" placeholder="관리자 코드" style="max-width:220px"> <button class="pri" onclick="sbClaim111()">관리자 모드 전환</button><p id="am111" class="mu"></p></div>')+"</div>"}
+const _profileView111=profileView;profileView=function(){return _profileView111.apply(this,arguments)+acct111()};
+/* ----- 관리자 도구: 서버 연결·백업 ----- */
+async function sbInitWorld111(src){if(!SBON||!SBADM)return;let msg="";if(src=="local"){let raw=null;try{raw=localStorage.getItem("nsma95local")}catch(e){}if(!raw){SBWT="";alert("이 브라우저에 저장돼 있던 기존 월드가 없습니다.");return}try{const keep=split111().user;D=merge111(JSON.parse(raw),keep)}catch(e){alert("기존 월드를 읽지 못했습니다: "+e.message);return}}
+  await sbPush111("world");if(SBST=="ok"){SBMSG="서버에 월드를 올렸습니다."}render()}
+async function sbBkList111(){if(!SBON||!SBADM)return;const r=await sb111.from("world_backup").select("id,note,created_at").order("id",{ascending:false}).limit(20);SBBL=r.error?{err:r.error.message}:{list:r.data||[]};render()}
+async function sbBkNow111(){await sbPush111(true);await sbBackup111("수동 백업",true);SBBL=null;await sbBkList111()}
+async function sbBkRestore111(id){if(!SBON||!SBADM)return;if(!confirm("이 백업으로 서버의 월드를 되돌립니다. (현재 서버 상태는 먼저 자동 백업됩니다) 계속할까요?"))return;const r=await sb111.from("world_backup").select("data").eq("id",id).maybeSingle();if(r.error||!r.data){alert("불러오지 못했습니다.");return}await sbBackup111("복원 직전 상태",true);D=merge111(r.data.data,split111().user);await sbPush111(true);SBBL=null;render()}
+function sbEd111(){if(!SBON)return '<div class="card"><h3>☁ 서버 연결·백업</h3><div class="mu">현재 로컬 체험 모드입니다. 서버에 연결하려면 로그아웃 후 이메일로 로그인하세요.</div></div>';
+  let h='<div class="card"><h3>☁ 서버 연결·백업</h3><div class="mu">계정 '+esc((SBME&&SBME.email)||"")+" · 서버 월드 "+(SBWORLD?"있음 (마지막 저장 "+esc(String(SBWT).slice(0,19).replace("T"," "))+")":"<b style=\"color:#b42318\">아직 없음</b>")+" · 상태 "+(SBST=="err"?'<b style="color:#b42318">저장 실패: '+esc(SBERR)+"</b>":SBST=="pending"?"저장 중":"정상")+'</div>';
+  if(SBMSG)h+='<div class="ok">'+esc(SBMSG)+"</div>";
+  if(!SBWORLD)h+='<div class="card" style="border-left:4px solid #b42318"><b>⚠ 서버에 월드 데이터가 없습니다</b><div class="mu">이 상태에서는 편집 내용이 서버에 자동 저장되지 않습니다. 먼저 아래 버튼으로 서버 월드를 만드세요. 이전에 이 브라우저에서 편집하던 월드가 있다면 ‘기존 월드 올리기’를 누르세요.</div>'+((function(){try{return!!localStorage.getItem("nsma95local")}catch(e){return false}})()?'<button class="pri" onclick="sbInitWorld111(\'local\')">📤 이 브라우저의 기존 월드 올리기</button> ':"")+'<button onclick="sbInitWorld111(\'cur\')">📤 지금 화면의 월드 올리기</button></div>';
+  else h+='<div class="mu">관리자 모드에서 편집한 내용은 1~2초 뒤 서버에 자동 저장되며, 저장하기 전 서버 상태가 30분마다 자동 백업됩니다(최근 20개 보관).</div><button class="pri" onclick="sbPush111(true).then(function(){render()})">💾 지금 서버에 저장</button> <button onclick="sbInitWorld111(\'cur\')">📤 지금 화면의 월드로 서버 덮어쓰기</button> <button onclick="sbBkNow111()">🗂 지금 백업</button> <button onclick="sbBkList111()">📜 백업 목록</button>';
+  if(SBBL){if(SBBL.err)h+='<div class="card" style="color:#b42318">백업 목록 오류: '+esc(SBBL.err)+" (SQL의 world_backup 표를 만들었는지 확인하세요)</div>";else h+='<div class="card"><b>백업 목록</b>'+(SBBL.list.map(function(b){return '<div style="display:flex;gap:6px;align-items:center;margin:3px 0"><span style="flex:1">'+esc(String(b.created_at).slice(0,19).replace("T"," "))+' <span class="mu">'+esc(b.note||"")+'</span></span><button onclick="sbBkRestore111('+b.id+')">되돌리기</button></div>'}).join("")||'<div class="mu">백업이 없습니다.</div>')+"</div>"}
+  return h+"</div>"}
+const _ab111=admBody;admBody=function(k){if(k=="sb111")return sbEd111();return _ab111.apply(this,arguments)};
+reg65(["sb111","☁","서버 연결·백업","Supabase 서버 저장 상태, 서버 월드 올리기, 자동 백업과 되돌리기.","서버에 월드 올리기",["서버","supabase","백업","저장","연결"],function(){return SBWORLD?1:0}]);TLL65.sb111="서버 연결·백업";
+/* ----- 시작: 저장된 로그인 복원 ----- */
+(async function(){if(!sbAvail111())return;try{sb111=supabase.createClient(SB111.url,SB111.key)}catch(e){return}SBBOOT=true;render();try{const g=(await sb111.auth.getSession()).data.session;if(g){SBME=g.user;await sbLoad111("");SBBOOT=false;sbEnter111();return}}catch(e){SBMSG="자동 로그인 실패: "+(e&&e.message?e.message:"")}SBBOOT=false;render()})();
 
 render();
 </script></body></html>
