@@ -8582,7 +8582,7 @@ setInterval(async function(){try{if(!SBON||!sb111||adm()||SBPUSH)return;const r=
   Object.keys(fv).forEach(function(k){const a=+fv[k]||0,b=+snap[k]||0;if(a===b)return;const c=(D.chars||[]).find(function(x){return String(x.id)===String(k)});const nm=esc(c?c.n:"");const n=Math.round(Math.abs(a-b)*10)/10;
    if(a>b){const o=c?lvAt(c,b):{lv:0},w=c?lvAt(c,a):{lv:0};
     show('<span style="color:#fb7185">♥</span> <b>+'+n+'</b> <span style="opacity:.85">'+nm+'</span>');
-    if(w.lv>o.lv)show('<span class="hb">♥</span> '+nm+' 호감 <b>Lv.'+w.lv+' 달성!</b>'+(w.t?' <span style="opacity:.9">‘'+esc(w.t)+'’</span>':""),"fvl",2700)}
+    if(w.lv>o.lv)show('<span class="hb">♥</span> '+nm+' 호감 <b>Lv.'+w.lv+' 달성!</b>'+(w.t?' <span style="opacity:.9">‘'+esc(w.t)+'’</span>':""),"fvl",2700);try{if(window.cutLv111&&c)cutLv111(c,o.lv,w.lv)}catch(e){}}
    else show('<span>💔</span> <b>−'+n+'</b> <span style="opacity:.85">'+nm+'</span>',"fvd")});
   snap=Object.assign({},fv)}catch(e){}}
  function later(){clearTimeout(tm);tm=setTimeout(chk,30)}
@@ -8620,6 +8620,111 @@ setInterval(async function(){try{if(!SBON||!sb111||adm()||SBPUSH)return;const r=
  const _s=Storage.prototype.setItem;Storage.prototype.setItem=function(){const r=_s.apply(this,arguments);later();return r};
  const _r=render;render=function(){const r=_r.apply(this,arguments);later();consume();signs();return r};
  setTimeout(chk,500);
+})();
+
+
+/* ===== 111e: 유저 통합 검색(세로 바 🔍) · 요원 강제 휴무 ===== */
+(function(){
+ /* ---------- 요원 강제 휴무 ---------- */
+ function frL(){return Array.isArray(D.fr111)?D.fr111:[]}
+ function frW(){if(!Array.isArray(D.fr111))D.fr111=[];return D.fr111}
+ function frAct(c){try{if(!c||c.gs||typeof P!=="object"||!P||!(+P.day>0))return null;const L=frL();for(let i=0;i<L.length;i++){const r=L[i];if(r.cid!==c.id)continue;const a=+r.from||0,b=+r.to||a;if(+P.day>=a&&+P.day<=b&&afOk(r.cd||""))return r}}catch(e){}return null}
+ window.frAct111=frAct;
+ const _mw=mustWhy;mustWhy=function(c){return frAct(c)?"휴무":_mw.apply(this,arguments)};
+ const _e110=elig110;elig110=function(c){return frAct(c)?"휴무 중":_e110.apply(this,arguments)};
+ const _e83=asgElig83;asgElig83=function(c){return frAct(c)?"휴무 중":_e83.apply(this,arguments)};
+ const _av=avail84;avail84=function(c){return frAct(c)?false:_av.apply(this,arguments)};
+ const _mp=mpCompOk;mpCompOk=function(c){return frAct(c)?false:_mp.apply(this,arguments)};
+ const _st=stMsg89;stMsg89=function(c){return frAct(c)?["오늘은 쉬는 날이다","#38bdf8"]:_st.apply(this,arguments)};
+ const _lc=loc;loc=function(c){return frAct(c)?"휴무":_lc.apply(this,arguments)};
+ const _zc=zoneChars;zoneChars=function(){return _zc.apply(this,arguments).filter(function(c){return !frAct(c)})};
+ function frAnn(){try{if(adm()||mode!=="u"||typeof P!=="object"||!P||!(+P.day>0))return;const L=frL();if(!L.length)return;if(!P.frn111)P.frn111={};let ch=false;
+  L.forEach(function(r){const c=D.chars.find(function(x){return x.id===r.cid});if(!c||frAct(c)!==r)return;const k=r.id+"@"+P.day;if(P.frn111[k])return;P.frn111[k]=1;ch=true;
+   try{ev("🛌 "+c.n+" 휴무"+(r.m?" — "+r.m:""))}catch(e){}
+   try{msgToast("🛌 "+c.n+": "+(r.m||"오늘은 쉽니다."))}catch(e){}
+   if(+r.mn)try{mnAdd(c,+r.mn)}catch(e){}
+   if(r.ms&&String(r.ms).trim())try{gsMsg(c,String(r.ms))}catch(e){}});
+  if(ch)sv()}catch(e){}}
+ const _bh=B.home;B.home=function(){const h=_bh.apply(this,arguments);try{if(adm()||typeof h!=="string")return h;const R=frL().map(function(r){const c=D.chars.find(function(x){return x.id===r.cid});return c&&frAct(c)===r?[c,r]:null}).filter(Boolean);if(!R.length)return h;
+  return '<div class="card" style="border-left:4px solid #38bdf8"><b>🛌 오늘 쉬는 요원</b>'+R.map(function(x){return'<div>'+esc(x[0].n)+' <span class="mu">'+esc(x[1].m||"오늘은 쉽니다.")+'</span></div>'}).join("")+'<div class="mu" style="font-size:12px">쉬는 요원은 임무에 편성할 수 없습니다.</div></div>'+h}catch(e){return h}};
+ /* 관리자 편집 */
+ window.frAdd111=function(){const c=D.chars.find(function(x){return !x.gs});frW().push({id:uid(),cid:c?c.id:"",from:1,to:1,m:"",ms:"",cd:"",mn:10});sv();render()};
+ window.frDel111=function(id){D.fr111=frW().filter(function(x){return x.id!==id});sv();render()};
+ window.frSet111=function(id,f,v){const r=frW().find(function(x){return x.id===id});if(!r)return;r[f]=(f==="from"||f==="to"||f==="mn")?Math.round(+v||0):v;if(f==="from"&&(+r.to||0)<(+r.from||0))r.to=r.from;if(f==="to"&&(+r.to||0)<(+r.from||0))r.to=r.from;sv();render()};
+ function frEd(){const L=frW();let h='<h3>🛌 요원 강제 휴무</h3><div class="mu">스토리 중 특정 요원을 <b>평일(근무일)에도 쉬게</b> 합니다. 지정한 요원·기간에만 적용되고, 지정하지 않으면 아무 일도 일어나지 않습니다. 쉬는 동안 그 요원은 임무·작전 편성, 동행 탐색에 쓸 수 없고 위치 현황에서 빠지며 상태 말풍선에 “쉬는 날”로 보입니다. 첫날에는 알림이 한 번 뜨고, 안내 채팅과 정신도 회복도 줄 수 있습니다.</div><button class="pri" onclick="frAdd111()">＋ 휴무 추가</button>';
+  h+=L.map(function(r){const sel='<select onchange="frSet111(\''+r.id+'\',\'cid\',this.value)">'+D.chars.filter(function(c){return !c.gs}).map(function(c){return'<option value="'+esc(c.id)+'" '+(c.id===r.cid?"selected":"")+'>'+esc(c.n)+'</option>'}).join("")+'</select>';
+   const a=+r.from||0,b=+r.to||a;let hol="";try{for(let d=a;d<=b&&d<a+60;d++){const sv0=P.day;P.day=d;const x=isHol();P.day=sv0;if(x){hol='<div class="mu" style="color:#b45309">※ DAY '+d+'은(는) 원래 휴일입니다.</div>';break}}}catch(e){}
+   return '<div class="card"><label class="mu">요원</label>'+sel+'<div style="display:flex;gap:8px;flex-wrap:wrap"><label class="mu">시작 DAY<input type="number" value="'+a+'" style="width:80px" onchange="frSet111(\''+r.id+'\',\'from\',this.value)"></label><label class="mu">끝 DAY<input type="number" value="'+b+'" style="width:80px" onchange="frSet111(\''+r.id+'\',\'to\',this.value)"></label><label class="mu">첫날 정신도 회복<input type="number" value="'+(+r.mn||0)+'" style="width:80px" onchange="frSet111(\''+r.id+'\',\'mn\',this.value)"></label></div><div class="mu">기간: DAY '+a+(b>a?' ~ '+b+' ('+(b-a+1)+'일)':'')+'</div>'+hol+'<label class="mu">알림 문장 (비우면 “오늘은 쉽니다.”)</label><input value="'+esc(r.m||"")+'" placeholder="예: 감기로 이틀 쉽니다." onchange="frSet111(\''+r.id+'\',\'m\',this.value)"><label class="mu">안내 채팅 (선택, 첫날 그 요원이 보냄 · 여러 줄이면 연속 전송)</label><textarea placeholder="예: 죄송해요, 오늘은 좀 쉬겠습니다." onchange="frSet111(\''+r.id+'\',\'ms\',this.value)">'+esc(r.ms||"")+'</textarea><label class="mu">추가 조건 (선택, ; 구분. 예: 해결:청람 화재 보고서)</label><input value="'+esc(r.cd||"")+'" onchange="frSet111(\''+r.id+'\',\'cd\',this.value)"><button onclick="frDel111(\''+r.id+'\')">삭제</button></div>'}).join("")||'<div class="mu" style="margin-top:8px">지정된 휴무가 없습니다.</div>';
+  return h}
+ try{TLL65.fr111="휴무";reg65(["fr111","🛌","요원 강제 휴무","스토리 중 특정 요원을 근무일에도 쉬게 합니다. 지정한 경우에만 적용됩니다.","요원: 나한길 / DAY 12~13 / 알림: 감기로 이틀 쉽니다",["요원·기간(DAY)","알림 문장·안내 채팅","첫날 정신도 회복","추가 조건(선택)"],function(){return frL().length}])}catch(e){}
+ const _ab=admBody;admBody=function(k){if(k==="fr111")return frEd();return _ab.apply(this,arguments)};
+
+ /* ---------- 유저 통합 검색 ---------- */
+ const st=document.createElement("style");st.textContent="#srch111{position:fixed;inset:0;z-index:9990;background:rgba(0,0,0,.4)}#srch111 .sp{position:absolute;top:56px;left:64px;width:min(460px,calc(100vw - 80px));max-height:calc(100vh - 90px);overflow:auto;background:#fff;color:#111;border:1px solid #888;border-radius:10px;padding:10px;box-shadow:0 8px 30px rgba(0,0,0,.35)}@media(prefers-color-scheme:dark){#srch111 .sp{background:#1b1f27;color:#e5e7eb;border-color:#555}}html[data-dev=m] #srch111 .sp{left:8px;top:8px;width:calc(100vw - 16px);max-height:calc(100vh - 90px)}#srch111 .sg{margin:8px 0 2px;font-size:12px;opacity:.7}#srch111 .sr{display:block;width:100%;text-align:left;margin:2px 0;padding:6px 8px}#srch111 .sr small{opacity:.65;display:block}";document.head.appendChild(st);
+ let SR=[];
+ function has(t,q){return String(t||"").toLowerCase().indexOf(q)>=0}
+ function snip(t,q){t=String(t||"").replace(/\s+/g," ");const i=t.toLowerCase().indexOf(q);if(i<0)return t.slice(0,40);return(i>12?"…":"")+t.slice(Math.max(0,i-12),i+34)+(t.length>i+34?"…":"")}
+ function build(q){q=String(q||"").trim().toLowerCase();SR=[];if(!q)return;const G={};const add=function(g,ic,t,sub,fn){(G[g]=G[g]||[]).push({ic:ic,t:t,sub:sub||"",fn:fn})};
+  try{const M=Object.assign({profile:"프로필·평판",rec:"기록실",bbs:"게시판·공지",wd:"세계관 사전",inbox:"우편·후일담",hol:"휴일 외출"},NL);Object.keys(M).forEach(function(k){if(!B[k])return;try{if(!unlocked(k))return}catch(e){}if(has(M[k],q))add("메뉴·화면","🧭",M[k],"",function(){go(k)})})}catch(e){}
+  try{D.chars.forEach(function(c){if(c.gs&&!(P.gst&&P.gst[c.id]))return;if(!c.gs&&P.co107&&(+c.od||c.oc)&&!P.co107[c.id])return;
+   if(has(c.n,q)||has(c.nk,q)||has(c.d,q)||has(c.rk,q))add("인물","🧑",c.n,(c.d||"")+(c.rk?" · "+c.rk:""),function(){go("codex");sel=c.id;render()})})}catch(e){}
+  try{D.cases.forEach(function(c){if(c.day&&+c.day>P.day)return;if(has(c.t,q))add("사건 파일","📁",c.t,"",function(){go("story")})})}catch(e){}
+  try{D.wd.forEach(function(w){if(!wdOk(w))return;if(has(w.t,q)||has(w.b,q)||has(w.cat,q))add("세계관 사전","📖",w.t,has(w.t,q)?(w.cat||""):snip(w.b,q),function(){wdP=w.id;go("wd");wdP=w.id;render()})})}catch(e){}
+  try{D.bp.forEach(function(p){if(!bbVis(p))return;if(has(p.t,q)||has(p.b,q))add("게시판·공지","📋",p.t,has(p.t,q)?("DAY "+(p.day||"-")):snip(p.b,q),function(){go("bbs");bbk=p.bd;if(p.d)bbd=p.d;bbOpen(p.id)})})}catch(e){}
+  try{D.info.forEach(function(x){if(!(P.info&&P.info[x.id]))return;if(has(x.t,q)||has(x.b,q))add("얻은 정보","🕵",x.t,has(x.t,q)?"":snip(x.b,q),function(){go("home");ph=true;pa="memo";mtab="trade";render()})})}catch(e){}
+  Object.keys(G).forEach(function(g){SR.push({g:g,L:G[g].slice(0,8),n:G[g].length})})}
+ function draw(){const el=document.getElementById("sres111");if(!el)return;let k=0;el.innerHTML=SR.length?SR.map(function(s){return'<div class="sg">'+esc(s.g)+' · '+s.n+(s.n>s.L.length?' (상위 '+s.L.length+'개)':'')+'</div>'+s.L.map(function(r){const i=k++;r.i=i;return'<button class="sr" onclick="srGo111('+i+')">'+r.ic+' '+esc(r.t)+(r.sub?'<small>'+esc(r.sub)+'</small>':'')+'</button>'}).join("")}).join(""):(document.getElementById("sq111")&&document.getElementById("sq111").value.trim()?'<div class="mu" style="padding:8px">검색 결과가 없습니다.</div>':'<div class="mu" style="padding:8px">메뉴 이름, 인물, 사건, 세계관 사전, 게시판 글, 얻은 정보를 한 번에 찾습니다. 아직 열리지 않은 내용은 나오지 않습니다.</div>')}
+ window.srQ111=function(v){build(v);draw()};
+ window.srGo111=function(i){let f=null;SR.forEach(function(s){s.L.forEach(function(r){if(r.i===i)f=r.fn})});srClose111();if(f)try{f()}catch(e){}};
+ window.srClose111=function(){const e=document.getElementById("srch111");if(e)e.remove()};
+ window.srOpen111=function(){srClose111();const d=document.createElement("div");d.id="srch111";d.onclick=function(e){if(e.target===d)srClose111()};
+  d.innerHTML='<div class="sp"><div style="display:flex;gap:6px"><input id="sq111" placeholder="🔍 통합 검색 — 이름·사건·사전·글·정보" style="flex:1" oninput="srQ111(this.value)" onkeydown="if(event.key===\'Escape\')srClose111()"><button onclick="srClose111()">✕</button></div><div id="sres111"></div></div>';document.body.appendChild(d);SR=[];draw();setTimeout(function(){const q=document.getElementById("sq111");if(q)q.focus()},30)};
+ document.addEventListener("keydown",function(e){try{if(e.key==="/"&&!e.ctrlKey&&!e.metaKey&&mode==="u"&&!adm()){const t=(document.activeElement&&document.activeElement.tagName)||"";if(/INPUT|TEXTAREA|SELECT/.test(t))return;e.preventDefault();srOpen111()}}catch(x){}});
+ const _sb=sideBar;sideBar=function(){let h=_sb.apply(this,arguments);try{if(!mode||adm()||typeof h!=="string")return h;const k='<button title="홈"';const i=h.indexOf(k);if(i<0)return h;return h.slice(0,i)+'<button title="검색 ( / )" onclick="alp=0;srOpen111()">🔍</button>'+h.slice(i)}catch(e){return h}};
+ const _r=render;render=function(){const r=_r.apply(this,arguments);frAnn();return r};
+})();
+
+
+/* ===== 111f: 컷인 정리(합류·레벨업 추가) · 설정 내보내기 선택 항목 ===== */
+(function(){
+ /* ---------- 컷인: 등장·퇴직·복직·파티 끄기 ---------- */
+ const OFF=["등장","퇴직","복직","파티"];
+ const _ci=cutin;cutin=function(c,trig,o){if(OFF.indexOf(trig)>=0&&!(o&&o.force))return false;return _ci.apply(this,arguments)};
+ try{CIT["합류"]="앞으로 잘 부탁드립니다.";CIT["레벨업"]="…고마워요. 덕분에 많이 가까워졌네요."}catch(e){}
+ /* 합류 컷인 (요원별 선택) */
+ function joinChk(){try{if(adm()||mode!=="u"||typeof P!=="object"||!P||!(+P.day>0))return;if(!P.cij111)P.cij111={};
+  D.chars.forEach(function(c){if(c.gs||!+c.cij||P.cij111[c.id])return;const j=(P.cn107&&P.cn107[c.id]==P.day)||(+c.hired&&c.hired==P.day);if(!j)return;P.cij111[c.id]=1;try{sv()}catch(e){}setTimeout(function(){try{cutin(c,"합류")}catch(e){}},500)})}catch(e){}}
+ /* 특별 레벨 컷인 */
+ function lvLines(c){const m={};String(c.clv||"").split("\n").forEach(function(l){l=l.trim();if(!l)return;const i=l.indexOf("|"),k=parseInt((i<0?l:l.slice(0,i)).replace(/[^0-9]/g,""),10);if(k>0)m[k]=i<0?"":l.slice(i+1).trim()});return m}
+ const _gf=grantF;grantF=function(c){const r=_gf.apply(this,arguments);try{if(adm()||mode!=="u"||!c||c.gs)return r;const M=lvLines(c),lv=lvl(c).lv;if(!(lv in M))return r;if(!P.clv111)P.clv111={};const k=c.id+":"+lv;if(P.clv111[k])return r;P.clv111[k]=1;try{sv()}catch(e){}
+   setTimeout(function(){try{cutin(c,"레벨업",M[lv]?{line:M[lv]}:{})}catch(e){}},700)}catch(e){}return r};
+ /* 편집 화면 */
+ const _il=B.ill;B.ill=function(){let h=_il.apply(this,arguments);try{const c=sel&&D.chars.find(function(x){return x.id==sel});if(!c)return h;
+  h=h.split("상황: 등장 / 퇴직 / 복직 / 재회 / 파티 / 엔딩").join("상황: 합류 / 레벨업 / 재회 / 엔딩");
+  const card='<div class="card"><h3>✨ 합류 · 특별 레벨 컷인</h3><label><input type="checkbox" id="il_cj" '+(+c.cij?"checked":"")+' style="width:auto"> 이 요원이 처음 합류할 때 컷인 (선택 · 합류일에 한 번, 대사는 위 컷인 대사의 “합류|…” 줄)</label><label class="mu">특별 레벨 컷인 — 한 줄에 레벨|대사 (적은 레벨에 도달할 때만 한 번 뜹니다. 대사 앞에 [감정] 가능. 대사를 비우면 “레벨업|…” 줄 또는 기본 문구)</label><textarea id="il_clv" placeholder="예)\n3|[기쁨]처음으로 웃어 줬다.\n5|이제 정말 친구라고 말해도 될까요?">'+esc(c.clv||"")+'</textarea><div class="mu" style="font-size:12px">컷인은 일러스트가 있고 위의 “컷인 연출 사용”이 켜져 있으며 유저가 알림 설정에서 컷인을 끄지 않았을 때만 나옵니다. 호감 레벨 수는 인물 편집의 칭호 줄 개수입니다.</div><button class="pri" onclick="ilSaveCi()">저장</button></div>';
+  const k='<div class="card"><h3>👁 미리보기</h3>';const i=h.indexOf(k);return i<0?h:h.slice(0,i)+card+h.slice(i)}catch(e){return h}};
+ const _sv=ilSaveCi;ilSaveCi=function(){try{const c=D.chars.find(function(x){return x.id==sel});if(c){const a=document.getElementById("il_cj"),b=document.getElementById("il_clv");if(a)c.cij=a.checked?1:0;if(b)c.clv=b.value}}catch(e){}return _sv.apply(this,arguments)};
+
+ /* ---------- 설정 내보내기: 요원 목록·채팅 등 선택 ---------- */
+ try{CL55.chat="💬 채팅 기록";CL55.lg="📖 일지 기록";CL55.notes="📝 메모";CL55.memo57="📝 관리자 쪽지"}catch(e){}
+ try{["chat","lg","notes","memo57"].forEach(function(k){CPSKIP57.delete(k)})}catch(e){}
+ const SEL={chars:1,chatS:1,hist:1,memo:1,rest:0};
+ const GRP={chars:["chars","rels","depts","ranks","pranks"],chatS:["pm","pmx","gc","uc","fm"],hist:["chat","lg"],memo:["notes","memo57","bp","posts","ba"]};
+ function cnt(k){const v=D[k];return Array.isArray(v)?v.length:(v&&typeof v==="object"?Object.keys(v).length:0)}
+ function sum(g){return g.reduce(function(a,k){return a+cnt(k)},0)}
+ window.cpSelTog111=function(k,on){SEL[k]=on?1:0};
+ window.cpInc111=function(on){try{["chat","lg","notes","memo57"].forEach(function(k){if(on)CPSKIP57.delete(k);else CPSKIP57.add(k)});if(CP57&&CP57.obj){CP57.list=cpDiff57();CP57.sel={};CP57.list.forEach(function(c){if(c.op!="del")CP57.sel[c.k]=1})}}catch(e){}render()};
+ window.cpDlSel111=function(){try{const o={__partial:1,at:new Date().toISOString()};const used={};Object.keys(GRP).forEach(function(g){GRP[g].forEach(function(k){used[k]=1;if(SEL[g]&&D[k]!==undefined)o[k]=D[k]})});
+  if(SEL.rest)Object.keys(D).forEach(function(k){if(!used[k])o[k]=D[k]});
+  const b=new Blob([JSON.stringify(o)],{type:"application/json"}),a=document.createElement("a");a.href=URL.createObjectURL(b);a.download="nsma-select-"+new Date().toISOString().slice(0,10)+".json";document.body.appendChild(a);a.click();setTimeout(function(){try{document.body.removeChild(a)}catch(e){}URL.revokeObjectURL(a.href)},500);try{msgToast("선택한 항목을 파일로 저장했습니다 ("+Math.round(JSON.stringify(o).length/1000)+"천 자).")}catch(e){}}catch(e){try{msgToast("파일 저장에 실패했습니다.")}catch(x){}}};
+ /* 부분 파일도 비교할 수 있게: 빠진 항목은 현재 값으로 채워 ‘변화 없음’ 처리 */
+ const _lo=cpLoad57;cpLoad57=function(txt){try{const o=JSON.parse(txt);if(o&&typeof o==="object"&&o.__partial){const f=Object.assign({},D,o);delete f.__partial;delete f.at;return _lo.call(this,JSON.stringify(f))}}catch(e){}return _lo.apply(this,arguments)};
+ const _ce=cmpEd57;cmpEd57=function(){let h=_ce.apply(this,arguments);try{
+  const inc=!CPSKIP57.has("chat");const row=function(k,lb,g){return'<label style="display:block"><input type="checkbox" style="width:auto" '+(SEL[k]?"checked":"")+' onchange="cpSelTog111(\''+k+'\',this.checked)"> '+lb+' <span class="mu">('+(g?sum(GRP[k]):Object.keys(D).length)+')</span></label>'};
+  const card='<div class="card"><b>① -2 선택해서 내보내기</b><div class="mu">내가 적은 요원 목록, 채팅 대사·기록, 메모·게시글만 골라 따로 저장합니다. 이 파일도 아래 ②에서 그대로 비교·가져오기 할 수 있고, 들어 있지 않은 항목은 현재 값 그대로 둡니다.</div>'+row("chars","🧑 요원 목록 (인물·관계·직급)",1)+row("chatS","💬 채팅 대사 (인물별 대사·선톡·단체 채팅·먼저 말 걸기·후속 연락)",1)+row("hist","🗨 채팅·일지 기록 (유저와 주고받은 내역)",1)+row("memo","📝 메모·게시글·자동 글",1)+row("rest","📦 위에 없는 나머지 설정 전부",0)+'<button class="pri" onclick="cpDlSel111()">⬇ 선택한 항목 저장</button></div>'
+  +'<div class="card"><label><input type="checkbox" style="width:auto" '+(inc?"checked":"")+' onchange="cpInc111(this.checked)"> 비교·가져오기에 채팅·일지 기록과 메모도 포함</label><div class="mu">끄면 기존처럼 이 항목들은 비교에서 빠집니다. 위 ‘설정 파일 다운로드’에는 언제나 모두 들어 있습니다.</div></div>';
+  const k='<button onclick="cpDl57()">⬇ 설정 파일 다운로드</button></div>',i=h.indexOf(k);return i<0?h:h.slice(0,i+k.length)+card+h.slice(i+k.length)}catch(e){return h}};
+ const _r=render;render=function(){const r=_r.apply(this,arguments);joinChk();return r};
 })();
 
 render();
