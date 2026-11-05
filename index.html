@@ -8727,5 +8727,36 @@ setInterval(async function(){try{if(!SBON||!sb111||adm()||SBPUSH)return;const r=
  const _r=render;render=function(){const r=_r.apply(this,arguments);joinChk();return r};
 })();
 
+
+/* ===== 111g: 특별 인물 체크가 ‘저장’ 없이 사라지던 문제 ===== */
+(function(){
+ function cap(){try{const c=D.chars.find(function(x){return x.id==sel});if(!c||!$("x1"))return;c.gs=$("x1").checked?1:0;if(c.gs)c.nf=1;const g=function(i){return $("x"+i)};if(g(2))c.bpn=g(2).value=="1"?1:0;if(g(3))c.bpl=g(3).value;if(g(4))c.clq=g(4).value;if(g(5))c.rcd=g(5).value;if(g(6))c.rcl=g(6).value}catch(e){}}
+ window.xCap111=function(){cap();try{sv()}catch(e){}};
+ window.gsTog111=function(){cap();try{sv()}catch(e){}render()};
+ const _ec=editChar;editChar=function(){cap();return _ec.apply(this,arguments)};
+ const _cx=B.codex;B.codex=function(){let h=_cx.apply(this,arguments);try{if(!adm()||!sel||typeof h!=="string")return h;return h.replace('id="x1" ','id="x1" onchange="gsTog111()" ').replace(/id="x([2-6])"/g,'id="x$1" onchange="xCap111()"')}catch(e){return h}};
+})();
+
+
+/* ===== 111h: 관리자 화면 위쪽 서버 저장 상태 고정 ===== */
+(function(){
+ const st=document.createElement("style");st.textContent="#sbtop111{position:fixed;top:5px;left:50%;transform:translateX(-50%);z-index:9000;font-size:12px;line-height:1.5;padding:2px 12px;border-radius:12px;color:#fff;cursor:pointer;white-space:nowrap;max-width:92vw;overflow:hidden;text-overflow:ellipsis;box-shadow:0 1px 6px #0005;border:1px solid #fff4}";document.head.appendChild(st);
+ function upd(){try{let el=document.getElementById("sbtop111");
+  if(typeof mode==="undefined"||!mode||!adm()){if(el)el.remove();const o=document.getElementById("sbbadge111");if(o)o.style.display="";return}
+  const o=document.getElementById("sbbadge111");if(o)o.style.display="none";
+  if(!el){el=document.createElement("div");el.id="sbtop111";el.title="눌러서 서버 연결·백업 열기";el.onclick=function(){try{view="admin";if(typeof sbGo64==="function")sbGo64("sb111");else{ht="sb111";render()}}catch(e){}};document.body.appendChild(el)}
+  const t=new Date(SBAT||Date.now()),hm=("0"+t.getHours()).slice(-2)+":"+("0"+t.getMinutes()).slice(-2);let txt,bg;
+  if(!SBON){txt="💾 이 브라우저에만 저장 중 — 서버 미연결";bg="#6b7280"}
+  else if(SBST=="err"){txt="⚠ 서버 저장 실패: "+(SBERR||"알 수 없음");bg="#b42318"}
+  else if(SBST=="pending"){txt="☁ 서버에 저장 중…";bg="#1f4e8c"}
+  else if(SBADM&&!SBWORLD){txt="⚠ 서버 월드 미설정 — 편집이 서버에 저장되지 않습니다 (눌러서 설정)";bg="#b42318"}
+  else if(!SBADM){txt="☁ 서버 연결됨 — 관리자 권한 없음 (월드는 저장되지 않음)";bg="#b45309"}
+  else{txt="☁ 서버 저장됨 "+hm;bg="#15803d"}
+  if(el.textContent!==txt)el.textContent=txt;if(el.style.background!==bg)el.style.background=bg}catch(e){}}
+ const _b=badge111;badge111=function(){const r=_b.apply(this,arguments);upd();return r};
+ const _r=render;render=function(){const r=_r.apply(this,arguments);upd();return r};
+ setInterval(upd,2000);setTimeout(upd,300);
+})();
+
 render();
 </script></body></html>
