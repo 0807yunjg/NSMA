@@ -8758,5 +8758,54 @@ setInterval(async function(){try{if(!SBON||!sb111||adm()||SBPUSH)return;const r=
  setInterval(upd,2000);setTimeout(upd,300);
 })();
 
+
+/* ===== 111i: 관리자 폰 ‘미니 게임 체험’에 의료 대형 추가 ===== */
+(function(){
+ const _tg=tryGame;tryGame=function(k,id){if(k==="mh"){ph=false;pa=null;try{P.cw110=P.cw110||{};const g=D.mh.find(function(x){return x.id==id});if(g)P.cw110[key110("mh",g)]=P.cw110[key110("mh",g)]||[]}catch(e){}mhOpen(id);return}return _tg.apply(this,arguments)};
+ const _ps=PA.set;PA.set=function(){let h=_ps.apply(this,arguments);try{if(!adm()||typeof h!=="string")return h;const m='📂 임무</div>',i=h.indexOf(m);if(i<0)return h;const j=h.indexOf("</div>",i+m.length);if(j<0)return h;
+  const blk='<div class="mu">🩺 의료 대형 (4단계 미니게임)</div>'+((D.mh||[]).map(function(g){return'<button onclick="tryGame(\'mh\',\''+g.id+'\')">'+esc(g.t)+'</button>'}).join(" ")||'<span class="mu">없음</span>');
+  return h.slice(0,j)+blk+h.slice(j)}catch(e){return h}};
+})();
+
+
+/* ===== 111j: 미리보기에서 선톡(자동 채팅)이 안 뜨던 문제 ===== */
+(function(){
+ /* 1) 관리자 ‘미리보기 모드’(샌드박스 진행)에서도 선톡 발송 — 미리보기 중 생긴 메시지는 저장하지 않고 미리보기를 끝낼 때 지운다 */
+ let PVN=0;
+ const _gm=gsMsg;gsMsg=function(c,t,s){const k=c.id+"_"+P.day,b=(D.chat[k]||[]).length,r=_gm.apply(this,arguments);if(PVN>=0&&window.__pvRun111){(D.chat[k]||[]).slice(b).forEach(function(x){x.pv=1;PVN++})}return r};
+ function purge(){try{if(!PVN)return;Object.keys(D.chat||{}).forEach(function(k){const a=(D.chat[k]||[]).filter(function(x){return !x.pv});if(a.length)D.chat[k]=a;else delete D.chat[k]});PVN=0}catch(e){}}
+ const _so=Storage.prototype.setItem;Storage.prototype.setItem=function(k,v){if(k==="nsma5"&&PVN>0){try{const o=JSON.parse(v);Object.keys(o.chat||{}).forEach(function(kk){const a=(o.chat[kk]||[]).filter(function(x){return !x.pv});if(a.length)o.chat[kk]=a;else delete o.chat[kk]});v=JSON.stringify(o)}catch(e){}}return _so.call(this,k,v)};
+ const _ar=admRestore52;admRestore52=function(){const r=_ar.apply(this,arguments);purge();return r};
+ const _r=render;render=function(){try{if(adm()&&typeof ADMSB!=="undefined"&&ADMSB&&view!=="admin"&&typeof pmTick==="function"){const m=mode;mode="u";window.__pvRun111=1;try{pmTick()}finally{mode=m;window.__pvRun111=0}}}catch(e){}return _r.apply(this,arguments)};
+ /* 2) 유저 시점 미리보기 창(iframe)은 서버 로그인 대신 로컬 코드 화면으로 시작 */
+ try{if(window.__PV82)SBLOCAL=true}catch(e){}
+ /* 3) 미리보기 창이 DAY를 못 맞추고 1일차로 열리던 문제: 입장 후 DAY·화면을 다시 맞춘다 */
+ try{const _ps=pvStart82;pvStart82=function(){const r=_ps.apply(this,arguments);[900,1700,2800].forEach(function(t){setTimeout(function(){try{const fr=PV82.fr,w=fr&&fr.contentWindow;if(!w||!w.eval)return;const d=+PV82.day||1;if(w.eval("typeof mode!='undefined'&&mode=='u'&&typeof P=='object'&&P&&P.day!="+d))w.eval("P.day="+d+";P.phase='work';"+(B[PV82.view]?"go('"+PV82.view+"');":"")+"render()")}catch(e){}},t)});return r}}catch(e){}
+})();
+
+
+/* ===== 111k: 합류 전 요원에게 선톡이 ‘보이지 않게’ 소진되던 문제 + 선톡 도착 진단 ===== */
+(function(){
+ /* 아직 합류하지 않은 요원의 선톡은 합류할 때까지 보류 (합류 뒤 그 날 첫 화면에서 도착) */
+ const _pt=pmTick;pmTick=function(){let hs=[];try{if(!adm()&&mode&&typeof P==="object"&&P)hs=hidSet107()||[]}catch(e){}
+  if(!hs.length||!Array.isArray(D.pmx))return _pt.apply(this,arguments);
+  const all=D.pmx;D.pmx=all.filter(function(m){return hs.indexOf(m.cid)<0});try{return _pt.apply(this,arguments)}finally{D.pmx=all}};
+ /* 선톡 모음 위에 도착 진단 카드 */
+ function why(m,day){const c=D.chars.find(function(x){return x.id===m.cid});if(!c)return"요원을 찾을 수 없음 (삭제됐거나 ID가 다름)";
+  if(!c.gs&&isRt(c))return"퇴직한 요원";
+  if(+m.day&&day<+m.day)return"아직 DAY 전 (DAY "+m.day+" 이상)";
+  try{if(chGate107(c)&&!((day>=(+c.od||0))&&afOk(c.oc||"")))return"요원이 아직 합류 전 (합류 DAY "+(+c.od||"-")+(c.oc?" · 조건 "+c.oc:"")+")"}catch(e){}
+  try{if(!cdAll(m.cd))return"조건 미충족: "+m.cd}catch(e){}
+  return""}
+ function diag(){const day=+P.day||1,L=D.pmx||[],seen={},dup=[];L.forEach(function(m){if(seen[m.id])dup.push(m.id);seen[m.id]=1});
+  const bad=[];let ok=0;L.forEach(function(m){const w=why(m,day);if(w)bad.push([m,w]);else ok++});
+  const nm=function(m){const c=D.chars.find(function(x){return x.id===m.cid});return c?c.n:"?"};
+  let h='<div class="card" style="border-left:4px solid #0ea5e9"><b>🩺 선톡 도착 진단</b> <span class="mu">(미리보기 DAY '+day+' 기준)</span><div>✅ 지금 도착 가능 '+ok+'개 · ⏳ 도착 못 하는 선톡 '+bad.length+'개'+(dup.length?' · ⚠ ID가 겹치는 선톡 '+dup.length+'개':'')+'</div>';
+  if(dup.length)h+='<div class="mu" style="color:#b45309">ID가 겹치면 하나만 도착하고 나머지는 도착한 것으로 처리됩니다. 겹친 선톡은 지우고 다시 만드세요.</div>';
+  h+=bad.slice(0,30).map(function(x){return'<div class="mu">• '+esc(nm(x[0]))+' · DAY '+(x[0].day||"-")+' · “'+esc(String(x[0].t).split("\\n")[0].slice(0,22))+'” → '+esc(x[1])+'</div>'}).join("");
+  if(bad.length>30)h+='<div class="mu">… 외 '+(bad.length-30)+'개</div>';return h+'</div>'}
+ const _ab=admBody;admBody=function(k){const h=_ab.apply(this,arguments);if(k==="pm110"&&typeof h==="string"){try{return diag()+h}catch(e){}}return h};
+})();
+
 render();
 </script></body></html>
